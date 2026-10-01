@@ -1,0 +1,84 @@
+﻿@page "/schools"
+@using SchoolDirectoryApp.Models
+@using SchoolDirectoryApp.Services
+@inject SchoolService SchoolService
+
+<PageTitle>School Directory</PageTitle>
+
+<h1>School Directory</h1>
+<label for="schoolSearch" class="form-label">Search schools</label>
+<input id="schoolSearch"
+       class="form-control mb-3"
+       @bind="Search"
+       @bind:event="oninput"
+       placeholder="Search school..." />
+
+@if (isLoading)
+{
+    <p>Loading schools...</p>
+}
+else if (hasError)
+{
+    <p class="text-danger">Unable to retrieve school data.</p>
+}
+else if (schools.Count == 0)
+{
+    <p>No schools were found.</p>
+}
+else if (!FilteredSchools.Any())
+{
+    <p>No schools match your search.</p>
+}
+else
+{
+    <div class="row">
+        @foreach (var school in FilteredSchools)
+        {
+            <div class="col-md-6 col-lg-4 mb-3">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <p class="text-muted mb-1">School ID: @school.SchoolId</p>
+                        <h2 class="h5 card-title">@school.SchoolName</h2>
+                        <p class="card-text">Address: @school.Address</p>
+                        <p class="card-text">Phone: @school.PhoneNo</p>
+                        <p class="card-text">Email: @school.EmailAddress</p>
+                        <p class="card-text">Proprietor: @school.ProprietorFullName</p>
+                        <p class="card-text">Head: @school.HeadFullName</p>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+}
+
+@code {
+    private List<School> schools = new();
+    private bool isLoading = true;
+    private bool hasError;
+    private string Search { get; set; } = string.Empty;
+
+    private IEnumerable<School> FilteredSchools =>
+        schools.Where(school =>
+            (school.SchoolName ?? string.Empty)
+                .Contains(Search, StringComparison.OrdinalIgnoreCase));
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            schools = await SchoolService.GetSchoolsAsync();
+        }
+        catch (HttpRequestException)
+        {
+            hasError = true;
+        }
+        catch (System.Text.Json.JsonException)
+        {
+            hasError = true;
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+}
