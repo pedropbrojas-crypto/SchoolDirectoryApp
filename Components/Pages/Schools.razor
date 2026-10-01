@@ -6,6 +6,26 @@
 <PageTitle>School Directory</PageTitle>
 
 <h1>School Directory</h1>
+
+@if (selectedSchool is not null)
+{
+    <div class="card mb-4">
+        <div class="card-body">
+            <h2 class="h4 card-title">@selectedSchool.SchoolName</h2>
+            <p><strong>School ID:</strong> @selectedSchool.SchoolId</p>
+            <p><strong>Address:</strong> @selectedSchool.Address</p>
+            <p><strong>Phone:</strong> @selectedSchool.PhoneNo</p>
+            <p><strong>Email:</strong> @selectedSchool.EmailAddress</p>
+            <p><strong>Proprietor:</strong> @selectedSchool.ProprietorFullName</p>
+            <p><strong>Head:</strong> @selectedSchool.HeadFullName</p>
+
+            <button class="btn btn-outline-secondary" @onclick="ClearSelection">
+                Close details
+            </button>
+        </div>
+    </div>
+}
+
 <label for="schoolSearch" class="form-label">Search schools</label>
 <input id="schoolSearch"
        class="form-control mb-3"
@@ -35,17 +55,7 @@ else
         @foreach (var school in FilteredSchools)
         {
             <div class="col-md-6 col-lg-4 mb-3">
-                <div class="card h-100">
-                    <div class="card-body">
-                        <p class="text-muted mb-1">School ID: @school.SchoolId</p>
-                        <h2 class="h5 card-title">@school.SchoolName</h2>
-                        <p class="card-text">Address: @school.Address</p>
-                        <p class="card-text">Phone: @school.PhoneNo</p>
-                        <p class="card-text">Email: @school.EmailAddress</p>
-                        <p class="card-text">Proprietor: @school.ProprietorFullName</p>
-                        <p class="card-text">Head: @school.HeadFullName</p>
-                    </div>
-                </div>
+                <SchoolCard School="school" OnSelect="SelectSchool" />
             </div>
         }
     </div>
@@ -55,12 +65,23 @@ else
     private List<School> schools = new();
     private bool isLoading = true;
     private bool hasError;
+    private School? selectedSchool;
     private string Search { get; set; } = string.Empty;
 
     private IEnumerable<School> FilteredSchools =>
         schools.Where(school =>
             (school.SchoolName ?? string.Empty)
                 .Contains(Search, StringComparison.OrdinalIgnoreCase));
+
+    private void SelectSchool(School school)
+    {
+        selectedSchool = school;
+    }
+
+    private void ClearSelection()
+    {
+        selectedSchool = null;
+    }
 
     protected override async Task OnInitializedAsync()
     {

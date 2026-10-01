@@ -1,0 +1,27 @@
+﻿@using Microsoft.AspNetCore.Components
+@using SchoolDirectoryApp.Models
+
+<div class="card h-100">
+    <div class="card-body">
+        <p class="text-muted mb-1">School ID: @School.SchoolId</p>
+        <h2 class="h5 card-title">@School.SchoolName</h2>
+        <p class="card-text">Address: @School.Address</p>
+
+        <button class="btn btn-primary" @onclick="NotifySelectionAsync">
+            View details
+        </button>
+    </div>
+</div>
+
+@code {
+    [Parameter]
+    public School School { get; set; } = default!;
+
+    [Parameter]
+    public EventCallback<School> OnSelect { get; set; }
+
+    private Task NotifySelectionAsync()
+    {
+        return OnSelect.InvokeAsync(School);
+    }
+}
